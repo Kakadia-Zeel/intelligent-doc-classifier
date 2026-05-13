@@ -39,6 +39,10 @@ dev = [
     "ipykernel>=6.27",
 ]
 
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["src*"]
+
 [tool.ruff]
 target-version = "py310"
 line-length = 100
