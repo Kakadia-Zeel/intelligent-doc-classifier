@@ -2,7 +2,6 @@
 
 import pickle
 from pathlib import Path
-from typing import Optional
 
 import numpy as np
 import structlog
@@ -14,7 +13,7 @@ logger = structlog.get_logger(__name__)
 
 
 def train_logistic_regression(
-    X_train: np.ndarray,
+    x_train: np.ndarray,
     y_train: np.ndarray,
     config_path: str = "model_config.yaml",
 ) -> LogisticRegression:
@@ -31,17 +30,17 @@ def train_logistic_regression(
         random_state=config["data"]["random_state"],
     )
 
-    logger.info("Training Logistic Regression", n_samples=X_train.shape[0])
-    model.fit(X_train, y_train)
+    logger.info("Training Logistic Regression", n_samples=x_train.shape[0])
+    model.fit(x_train, y_train)
     logger.info("Logistic Regression training complete")
     return model
 
 
 def train_lightgbm(
-    X_train: np.ndarray,
+    x_train: np.ndarray,
     y_train: np.ndarray,
-    X_val: Optional[np.ndarray] = None,
-    y_val: Optional[np.ndarray] = None,
+    x_val: np.ndarray | None = None,
+    y_val: np.ndarray | None = None,
     config_path: str = "model_config.yaml",
 ):
     """Train a LightGBM classifier."""
@@ -68,27 +67,23 @@ def train_lightgbm(
     }
 
     callbacks = [lgb.log_evaluation(period=50)]
-    if X_val is not None and y_val is not None:
-        callbacks.append(
-            lgb.early_stopping(
-                stopping_rounds=lgbm_config["early_stopping_rounds"]
-            )
-        )
+    if x_val is not None and y_val is not None:
+        callbacks.append(lgb.early_stopping(stopping_rounds=lgbm_config["early_stopping_rounds"]))
 
     model = lgb.LGBMClassifier(**params)
 
     logger.info(
         "Training LightGBM",
-        n_samples=X_train.shape[0],
-        n_features=X_train.shape[1],
+        n_samples=x_train.shape[0],
+        n_features=x_train.shape[1],
     )
 
     fit_params = {}
-    if X_val is not None and y_val is not None:
-        fit_params["eval_set"] = [(X_val, y_val)]
+    if x_val is not None and y_val is not None:
+        fit_params["eval_set"] = [(x_val, y_val)]
         fit_params["callbacks"] = callbacks
 
-    model.fit(X_train, y_train, **fit_params)
+    model.fit(x_train, y_train, **fit_params)
     logger.info(
         "LightGBM training complete",
         best_iteration=getattr(model, "best_iteration_", None),

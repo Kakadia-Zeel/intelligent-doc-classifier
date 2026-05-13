@@ -1,6 +1,6 @@
 """Model explainability using LIME for text classification."""
 
-from typing import Callable, Optional
+from collections.abc import Callable
 
 import numpy as np
 import structlog
@@ -20,7 +20,8 @@ class TextExplainer:
         """Initialize the explainer.
 
         Args:
-            predict_fn: Function that takes list[str] and returns probability matrix (n_samples, n_classes)
+            predict_fn: Function that takes list[str] and returns
+                probability matrix of shape (n_samples, n_classes)
             class_names: List of class names corresponding to prediction columns
         """
         self.predict_fn = predict_fn
@@ -73,17 +74,13 @@ class TextExplainer:
             "predicted_class": pred_class,
             "confidence": float(probs[pred_idx]),
             "top_features": [
-                {"word": word, "weight": float(weight)}
-                for word, weight in top_features
+                {"word": word, "weight": float(weight)} for word, weight in top_features
             ],
             "class_probabilities": {
-                name: float(probs[i])
-                for i, name in enumerate(self.class_names)
+                name: float(probs[i]) for i, name in enumerate(self.class_names)
             },
             "all_class_features": {
-                cls: [
-                    {"word": w, "weight": float(wt)} for w, wt in feats
-                ]
+                cls: [{"word": w, "weight": float(wt)} for w, wt in feats]
                 for cls, feats in all_class_features.items()
             },
         }
@@ -104,6 +101,5 @@ class TextExplainer:
     ) -> list[dict]:
         """Generate explanations for multiple texts."""
         return [
-            self.explain(text, num_features=num_features, num_samples=num_samples)
-            for text in texts
+            self.explain(text, num_features=num_features, num_samples=num_samples) for text in texts
         ]

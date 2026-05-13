@@ -1,7 +1,7 @@
 """MLflow model registry integration."""
 
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 import structlog
 
@@ -25,8 +25,8 @@ def log_experiment(
     model_name: str,
     params: dict[str, Any],
     metrics: dict[str, float],
-    artifacts_dir: Optional[Path] = None,
-    tags: Optional[dict[str, str]] = None,
+    artifacts_dir: Path | None = None,
+    tags: dict[str, str] | None = None,
 ) -> str:
     """Log a training experiment to MLflow.
 

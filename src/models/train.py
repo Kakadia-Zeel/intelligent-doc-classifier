@@ -1,15 +1,21 @@
 """Training orchestration — runs all models and logs experiments."""
 
 import json
+from collections import Counter
 from pathlib import Path
 
 import numpy as np
 import structlog
 
-from src.data.preprocess import clean_text, load_raw_data, preprocess_dataframe, split_data
+from src.data.preprocess import load_raw_data, preprocess_dataframe, split_data
 from src.features.tfidf import TfidfFeaturePipeline
 from src.models.baseline import save_baseline_model, train_lightgbm, train_logistic_regression
-from src.models.evaluate import compare_models, compute_metrics, print_evaluation_report, save_metrics
+from src.models.evaluate import (
+    compare_models,
+    compute_metrics,
+    print_evaluation_report,
+    save_metrics,
+)
 from src.models.registry import log_experiment, setup_mlflow
 from src.utils.config import load_config
 
@@ -19,7 +25,7 @@ ARTIFACTS_DIR = Path("artifacts")
 
 
 def run_training_pipeline(config_path: str = "model_config.yaml") -> dict:
-    """Run the full training pipeline: data → features → models → evaluation."""
+    """Run the full training pipeline: data -> features -> models -> evaluation."""
     config = load_config(config_path)
     training_config = load_config("training_config.yaml")
 
@@ -51,9 +57,9 @@ def run_training_pipeline(config_path: str = "model_config.yaml") -> dict:
     # === TF-IDF Feature Pipeline ===
     logger.info("Building TF-IDF features")
     tfidf_pipeline = TfidfFeaturePipeline(config_path)
-    X_train, y_train = tfidf_pipeline.fit_transform(train_texts, train_labels)
-    X_val, y_val = tfidf_pipeline.transform(val_texts, val_labels)
-    X_test, y_test = tfidf_pipeline.transform(test_texts, test_labels)
+    feat_train, y_train = tfidf_pipeline.fit_transform(train_texts, train_labels)
+    feat_val, y_val = tfidf_pipeline.transform(val_texts, val_labels)
+    feat_test, y_test = tfidf_pipeline.transform(test_texts, test_labels)
 
     # Save pipeline
     tfidf_pipeline.save(ARTIFACTS_DIR / "tfidf")
@@ -67,8 +73,8 @@ def run_training_pipeline(config_path: str = "model_config.yaml") -> dict:
     # === Logistic Regression Baseline ===
     if training_config["training"]["run_baseline"]:
         logger.info("Training Logistic Regression baseline")
-        lr_model = train_logistic_regression(X_train, y_train, config_path)
-        lr_preds = lr_model.predict(X_test)
+        lr_model = train_logistic_regression(feat_train, y_train, config_path)
+        lr_preds = lr_model.predict(feat_test)
         lr_metrics = compute_metrics(y_test, lr_preds, label_names)
         print_evaluation_report(lr_metrics, "TF-IDF + Logistic Regression")
 
@@ -86,8 +92,8 @@ def run_training_pipeline(config_path: str = "model_config.yaml") -> dict:
     # === LightGBM ===
     if training_config["training"]["run_lightgbm"]:
         logger.info("Training LightGBM")
-        lgbm_model = train_lightgbm(X_train, y_train, X_val, y_val, config_path)
-        lgbm_preds = lgbm_model.predict(X_test)
+        lgbm_model = train_lightgbm(feat_train, y_train, feat_val, y_val, config_path)
+        lgbm_preds = lgbm_model.predict(feat_test)
         lgbm_metrics = compute_metrics(y_test, lgbm_preds, label_names)
         print_evaluation_report(lgbm_metrics, "TF-IDF + LightGBM")
 
@@ -118,9 +124,11 @@ def run_training_pipeline(config_path: str = "model_config.yaml") -> dict:
         val_labels_enc = tfidf_pipeline.label_encoder.transform(val_labels)
         test_labels_enc = tfidf_pipeline.label_encoder.transform(test_labels)
 
-        history = transformer.train(
-            train_texts, train_labels_enc.tolist(),
-            val_texts, val_labels_enc.tolist(),
+        transformer.train(
+            train_texts,
+            train_labels_enc.tolist(),
+            val_texts,
+            val_labels_enc.tolist(),
         )
 
         tf_preds, tf_probs = transformer.predict(test_texts)
@@ -156,8 +164,6 @@ def _save_reference_distribution(texts: list[str], labels: list[str]) -> None:
 
     text_lengths = [len(t) for t in texts]
     word_counts = [len(t.split()) for t in texts]
-
-    from collections import Counter
 
     label_dist = dict(Counter(labels))
 

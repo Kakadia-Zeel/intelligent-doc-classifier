@@ -42,9 +42,7 @@ class TransformerClassifier:
         self.label_names = label_names
         self.device = get_device()
 
-        self.tokenizer = AutoTokenizer.from_pretrained(
-            self.tf_config["model_name"]
-        )
+        self.tokenizer = AutoTokenizer.from_pretrained(self.tf_config["model_name"])
         self.model = AutoModelForSequenceClassification.from_pretrained(
             self.tf_config["model_name"],
             num_labels=num_classes,
@@ -93,9 +91,7 @@ class TransformerClassifier:
 
         total_steps = len(train_loader) * self.tf_config["epochs"]
         warmup_steps = int(total_steps * self.tf_config["warmup_ratio"])
-        scheduler = get_linear_schedule_with_warmup(
-            optimizer, warmup_steps, total_steps
-        )
+        scheduler = get_linear_schedule_with_warmup(optimizer, warmup_steps, total_steps)
 
         best_val_f1 = 0.0
         best_state = None
@@ -148,9 +144,7 @@ class TransformerClassifier:
 
             if val_f1 > best_val_f1:
                 best_val_f1 = val_f1
-                best_state = {
-                    k: v.cpu().clone() for k, v in self.model.state_dict().items()
-                }
+                best_state = {k: v.cpu().clone() for k, v in self.model.state_dict().items()}
 
         # Restore best model
         if best_state is not None:
@@ -192,12 +186,8 @@ class TransformerClassifier:
 
     def predict(self, texts: list[str]) -> tuple[np.ndarray, np.ndarray]:
         """Predict classes and probabilities for texts."""
-        dataset = ComplaintDataset(
-            texts, None, self.tokenizer, self.tf_config["max_length"]
-        )
-        loader = DataLoader(
-            dataset, batch_size=self.tf_config["batch_size"] * 2, shuffle=False
-        )
+        dataset = ComplaintDataset(texts, None, self.tokenizer, self.tf_config["max_length"])
+        loader = DataLoader(dataset, batch_size=self.tf_config["batch_size"] * 2, shuffle=False)
 
         self.model.eval()
         all_probs = []
@@ -207,9 +197,7 @@ class TransformerClassifier:
                 input_ids = batch["input_ids"].to(self.device)
                 attention_mask = batch["attention_mask"].to(self.device)
 
-                outputs = self.model(
-                    input_ids=input_ids, attention_mask=attention_mask
-                )
+                outputs = self.model(input_ids=input_ids, attention_mask=attention_mask)
                 probs = torch.softmax(outputs.logits, dim=-1)
                 all_probs.extend(probs.cpu().numpy())
 
@@ -223,9 +211,7 @@ class TransformerClassifier:
         pred_idx = preds[0]
         pred_label = self.label_names[pred_idx]
         confidence = float(probs[0][pred_idx])
-        class_probs = {
-            name: float(probs[0][i]) for i, name in enumerate(self.label_names)
-        }
+        class_probs = {name: float(probs[0][i]) for i, name in enumerate(self.label_names)}
         return pred_label, confidence, class_probs
 
     def save(self, path: Path) -> None:
@@ -257,9 +243,9 @@ class TransformerClassifier:
         instance.tf_config = instance.config["transformer"]
 
         instance.tokenizer = AutoTokenizer.from_pretrained(path / "tokenizer")
-        instance.model = AutoModelForSequenceClassification.from_pretrained(
-            path / "model"
-        ).to(instance.device)
+        instance.model = AutoModelForSequenceClassification.from_pretrained(path / "model").to(
+            instance.device
+        )
 
         logger.info("Transformer loaded", path=str(path))
         return instance
