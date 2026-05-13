@@ -11,16 +11,20 @@ data:
   label_mapping:
     "Credit reporting, credit repair services, or other personal consumer reports": "Credit reporting"
     "Credit reporting": "Credit reporting"
+    "Credit reporting or other personal consumer reports": "Credit reporting"
     "Credit card or prepaid card": "Credit card"
     "Credit card": "Credit card"
+    "Prepaid card": "Credit card"
     "Checking or savings account": "Banking"
     "Bank account or service": "Banking"
     "Money transfer, virtual currency, or money service": "Money transfer"
     "Money transfers": "Money transfer"
     "Payday loan, title loan, or personal loan": "Personal loan"
+    "Payday loan, title loan, personal loan, or advance loan": "Personal loan"
     "Payday loan": "Personal loan"
     "Vehicle loan or lease": "Vehicle loan"
     "Consumer Loan": "Vehicle loan"
+    "Debt or credit management": "Debt collection"
 
 preprocessing:
   max_text_length: 512

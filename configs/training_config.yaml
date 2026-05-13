@@ -6,7 +6,7 @@ training:
   seed: 42
   run_baseline: true
   run_lightgbm: true
-  run_transformer: true
+  run_transformer: false
   save_artifacts: true
   artifact_dir: "artifacts"
 

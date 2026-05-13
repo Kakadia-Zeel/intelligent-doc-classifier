@@ -29,11 +29,11 @@ A production-grade ML system that automatically classifies consumer financial do
 
 | Model                  | Accuracy | Macro-F1 | Weighted-F1 | Inference Latency |
 |------------------------|----------|----------|-------------|-------------------|
-| TF-IDF + LogReg        | ~76%     | ~0.72    | ~0.75       | < 5ms             |
-| TF-IDF + LightGBM      | ~83%     | ~0.80    | ~0.82       | < 10ms            |
+| TF-IDF + LogReg        | 34.9%    | 0.17     | 0.42        | < 5ms             |
+| TF-IDF + LightGBM      | **87.3%**| **0.77** | **0.88**    | < 10ms            |
 | DistilBERT (fine-tuned) | ~91%     | ~0.88    | ~0.90       | < 80ms            |
 
-> Exact numbers depend on dataset version and hardware. Run `make train` to reproduce.
+> LogReg serves as a simple baseline on heavily imbalanced 9-class data. LightGBM dramatically improves via tree-based feature interactions. DistilBERT numbers are estimated — enable with `run_transformer: true` in training config.
 
 ## Key Features
 

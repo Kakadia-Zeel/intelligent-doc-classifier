@@ -1,0 +1,18 @@
+{
+  "n_samples": 70613,
+  "text_length_mean": 867.5901887754379,
+  "text_length_std": 666.3040064213742,
+  "word_count_mean": 143.2969566510416,
+  "word_count_std": 109.29911127829827,
+  "label_distribution": {
+    "Credit reporting": 47143,
+    "Debt collection": 8103,
+    "Student loan": 1095,
+    "Money transfer": 2226,
+    "Vehicle loan": 1069,
+    "Credit card": 4386,
+    "Personal loan": 645,
+    "Banking": 3501,
+    "Mortgage": 2445
+  }
+}
