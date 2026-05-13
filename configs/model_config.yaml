@@ -1,0 +1,74 @@
+data:
+  dataset_url: "https://files.consumerfinance.gov/ccdb/complaints.csv.zip"
+  target_column: "Product"
+  text_column: "Consumer complaint narrative"
+  min_samples_per_class: 1000
+  test_size: 0.15
+  val_size: 0.10
+  random_state: 42
+  max_samples: 500000
+
+  label_mapping:
+    "Credit reporting, credit repair services, or other personal consumer reports": "Credit reporting"
+    "Credit reporting": "Credit reporting"
+    "Credit card or prepaid card": "Credit card"
+    "Credit card": "Credit card"
+    "Checking or savings account": "Banking"
+    "Bank account or service": "Banking"
+    "Money transfer, virtual currency, or money service": "Money transfer"
+    "Money transfers": "Money transfer"
+    "Payday loan, title loan, or personal loan": "Personal loan"
+    "Payday loan": "Personal loan"
+    "Vehicle loan or lease": "Vehicle loan"
+    "Consumer Loan": "Vehicle loan"
+
+preprocessing:
+  max_text_length: 512
+  min_text_length: 10
+  remove_pii_patterns: true
+  lowercase: true
+
+baseline:
+  tfidf:
+    max_features: 50000
+    ngram_range: [1, 2]
+    min_df: 5
+    max_df: 0.95
+    sublinear_tf: true
+
+  logistic_regression:
+    max_iter: 1000
+    C: 1.0
+    class_weight: "balanced"
+
+  lightgbm:
+    objective: "multiclass"
+    n_estimators: 500
+    learning_rate: 0.1
+    max_depth: 8
+    num_leaves: 63
+    min_child_samples: 20
+    subsample: 0.8
+    colsample_bytree: 0.8
+    class_weight: "balanced"
+    early_stopping_rounds: 30
+    verbose: -1
+
+transformer:
+  model_name: "distilbert-base-uncased"
+  max_length: 256
+  batch_size: 32
+  epochs: 4
+  learning_rate: 2.0e-5
+  warmup_ratio: 0.1
+  weight_decay: 0.01
+  fp16: true
+
+evaluation:
+  metrics:
+    - accuracy
+    - macro_f1
+    - weighted_f1
+    - per_class_precision
+    - per_class_recall
+    - confusion_matrix

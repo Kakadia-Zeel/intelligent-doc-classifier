@@ -1,0 +1,21 @@
+experiment:
+  name: "doc-classifier"
+  tracking_uri: "mlruns"
+
+training:
+  seed: 42
+  run_baseline: true
+  run_lightgbm: true
+  run_transformer: true
+  save_artifacts: true
+  artifact_dir: "artifacts"
+
+optuna:
+  n_trials: 30
+  timeout: 1800
+  study_name: "lgbm-optimization"
+
+early_stopping:
+  patience: 3
+  metric: "macro_f1"
+  mode: "max"

@@ -1,0 +1,53 @@
+# Data files
+data/raw/*
+data/processed/*
+!data/raw/.gitkeep
+!data/processed/.gitkeep
+!data/reference/
+
+# Models
+*.pkl
+*.joblib
+*.h5
+*.pt
+*.bin
+*.onnx
+models/
+
+# MLflow
+mlruns/
+mlartifacts/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Jupyter
+.ipynb_checkpoints/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Environment
+.env
+.env.local
+
+# Hugging Face cache
+.cache/

@@ -1,0 +1,21 @@
+server:
+  host: "0.0.0.0"
+  port: 8000
+  workers: 1
+  log_level: "info"
+
+model:
+  type: "transformer"  # "baseline" or "transformer"
+  artifact_path: "artifacts/model"
+  fallback_to_baseline: true
+
+inference:
+  max_batch_size: 64
+  timeout_seconds: 30
+  return_probabilities: true
+  return_explanation: false  # LIME is slow; enable per-request via query param
+
+monitoring:
+  enabled: true
+  reference_data_path: "data/reference/reference_distribution.json"
+  drift_check_interval: 100  # Check every N predictions
