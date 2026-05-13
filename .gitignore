@@ -12,7 +12,7 @@ data/processed/*
 *.pt
 *.bin
 *.onnx
-models/
+/models/
 
 # MLflow
 mlruns/
