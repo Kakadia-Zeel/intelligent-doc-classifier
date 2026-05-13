@@ -2,12 +2,10 @@
 
 import pickle
 from pathlib import Path
-from typing import Optional
 
 import numpy as np
-import pandas as pd
 import structlog
-from scipy.sparse import hstack, issparse
+from scipy.sparse import hstack
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.preprocessing import LabelEncoder
 
@@ -52,8 +50,8 @@ class TfidfFeaturePipeline:
         return self
 
     def transform(
-        self, texts: list[str], labels: Optional[list[str]] = None
-    ) -> tuple[np.ndarray, Optional[np.ndarray]]:
+        self, texts: list[str], labels: list[str] | None = None
+    ) -> tuple[np.ndarray, np.ndarray | None]:
         """Transform texts into feature matrix."""
         if not self._is_fitted:
             raise RuntimeError("Pipeline not fitted. Call fit() first.")
@@ -69,18 +67,16 @@ class TfidfFeaturePipeline:
         from scipy.sparse import csr_matrix
 
         text_sparse = csr_matrix(text_features_array)
-        X = hstack([tfidf_matrix, text_sparse])
+        features = hstack([tfidf_matrix, text_sparse])
 
         # Encode labels if provided
         y = None
         if labels is not None:
             y = self.label_encoder.transform(labels)
 
-        return X, y
+        return features, y
 
-    def fit_transform(
-        self, texts: list[str], labels: list[str]
-    ) -> tuple[np.ndarray, np.ndarray]:
+    def fit_transform(self, texts: list[str], labels: list[str]) -> tuple[np.ndarray, np.ndarray]:
         """Fit and transform in one step."""
         self.fit(texts, labels)
         return self.transform(texts, labels)

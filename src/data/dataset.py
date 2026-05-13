@@ -1,7 +1,5 @@
 """PyTorch Dataset for transformer-based document classification."""
 
-from typing import Optional
-
 import torch
 from torch.utils.data import Dataset
 from transformers import PreTrainedTokenizer
@@ -13,7 +11,7 @@ class ComplaintDataset(Dataset):
     def __init__(
         self,
         texts: list[str],
-        labels: Optional[list[int]],
+        labels: list[int] | None,
         tokenizer: PreTrainedTokenizer,
         max_length: int = 256,
     ):

@@ -70,7 +70,5 @@ class TestHealthResponse:
     """Tests for HealthResponse schema."""
 
     def test_healthy(self):
-        resp = HealthResponse(
-            status="healthy", model_loaded=True, model_type="transformer"
-        )
+        resp = HealthResponse(status="healthy", model_loaded=True, model_type="transformer")
         assert resp.status == "healthy"

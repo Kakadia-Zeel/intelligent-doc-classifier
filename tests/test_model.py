@@ -1,12 +1,9 @@
 """Model regression tests using golden dataset."""
 
-import json
 from pathlib import Path
-from unittest.mock import patch
 
 import numpy as np
 import pytest
-
 
 ARTIFACTS_DIR = Path("artifacts")
 
@@ -25,9 +22,9 @@ class TestTfidfPipeline:
         pipeline.label_encoder = LabelEncoder()
         pipeline._is_fitted = False
 
-        X, y = pipeline.fit_transform(sample_texts, sample_labels)
+        features, y = pipeline.fit_transform(sample_texts, sample_labels)
 
-        assert X.shape[0] == len(sample_texts)
+        assert features.shape[0] == len(sample_texts)
         assert y is not None
         assert len(y) == len(sample_labels)
         assert len(np.unique(y)) == len(set(sample_labels))

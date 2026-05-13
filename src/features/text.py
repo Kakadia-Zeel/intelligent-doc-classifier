@@ -24,9 +24,7 @@ def extract_text_features(texts: Sequence[str]) -> pd.DataFrame:
                 "text_length": len(text),
                 "word_count": len(words),
                 "sentence_count": len(non_empty_sentences),
-                "avg_word_length": (
-                    float(np.mean([len(w) for w in words])) if words else 0.0
-                ),
+                "avg_word_length": (float(np.mean([len(w) for w in words])) if words else 0.0),
                 "avg_sentence_length": (
                     float(np.mean([len(s.split()) for s in non_empty_sentences]))
                     if non_empty_sentences
@@ -37,15 +35,9 @@ def extract_text_features(texts: Sequence[str]) -> pd.DataFrame:
                 "date_count": text.count("[DATE]"),
                 "exclamation_count": text.count("!"),
                 "question_count": text.count("?"),
-                "uppercase_ratio": (
-                    sum(1 for c in text if c.isupper()) / max(len(text), 1)
-                ),
-                "digit_ratio": (
-                    sum(1 for c in text if c.isdigit()) / max(len(text), 1)
-                ),
-                "unique_word_ratio": (
-                    len(set(words)) / max(len(words), 1)
-                ),
+                "uppercase_ratio": (sum(1 for c in text if c.isupper()) / max(len(text), 1)),
+                "digit_ratio": (sum(1 for c in text if c.isdigit()) / max(len(text), 1)),
+                "unique_word_ratio": (len(set(words)) / max(len(words), 1)),
             }
         )
     return pd.DataFrame(features)

@@ -1,7 +1,5 @@
 """Tests for text feature extraction."""
 
-import pytest
-
 from src.features.text import extract_text_features
 
 
@@ -27,15 +25,11 @@ class TestExtractTextFeatures:
         assert features.iloc[0]["sentence_count"] == 3
 
     def test_redacted_count(self):
-        features = extract_text_features(
-            ["[REDACTED] account charged [REDACTED]"]
-        )
+        features = extract_text_features(["[REDACTED] account charged [REDACTED]"])
         assert features.iloc[0]["redacted_count"] == 2
 
     def test_amount_count(self):
-        features = extract_text_features(
-            ["charged [AMOUNT] and then [AMOUNT] more"]
-        )
+        features = extract_text_features(["charged [AMOUNT] and then [AMOUNT] more"])
         assert features.iloc[0]["amount_count"] == 2
 
     def test_empty_text(self):

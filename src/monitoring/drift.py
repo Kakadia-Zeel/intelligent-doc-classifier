@@ -2,7 +2,6 @@
 
 import json
 from pathlib import Path
-from typing import Optional
 
 import pandas as pd
 import structlog
@@ -13,8 +12,8 @@ logger = structlog.get_logger(__name__)
 def create_text_drift_report(
     reference_texts: list[str],
     current_texts: list[str],
-    reference_labels: Optional[list[str]] = None,
-    current_labels: Optional[list[str]] = None,
+    reference_labels: list[str] | None = None,
+    current_labels: list[str] | None = None,
 ) -> dict:
     """Generate a drift report comparing reference and current text distributions.
 
@@ -62,22 +61,16 @@ def create_text_drift_report(
     return drift_summary
 
 
-def _build_text_features_df(
-    texts: list[str], labels: Optional[list[str]] = None
-) -> pd.DataFrame:
+def _build_text_features_df(texts: list[str], labels: list[str] | None = None) -> pd.DataFrame:
     """Build a DataFrame with text metadata for drift detection."""
     data = {
         "text_length": [len(t) for t in texts],
         "word_count": [len(t.split()) for t in texts],
-        "avg_word_length": [
-            sum(len(w) for w in t.split()) / max(len(t.split()), 1) for t in texts
-        ],
+        "avg_word_length": [sum(len(w) for w in t.split()) / max(len(t.split()), 1) for t in texts],
         "sentence_count": [t.count(".") + t.count("!") + t.count("?") for t in texts],
         "redacted_count": [t.count("[REDACTED]") for t in texts],
         "amount_count": [t.count("[AMOUNT]") for t in texts],
-        "question_ratio": [
-            t.count("?") / max(len(t), 1) for t in texts
-        ],
+        "question_ratio": [t.count("?") / max(len(t), 1) for t in texts],
     }
 
     if labels is not None:
@@ -86,9 +79,7 @@ def _build_text_features_df(
     return pd.DataFrame(data)
 
 
-def _basic_drift_check(
-    reference_texts: list[str], current_texts: list[str]
-) -> dict:
+def _basic_drift_check(reference_texts: list[str], current_texts: list[str]) -> dict:
     """Fallback drift detection without Evidently."""
     import numpy as np
 
@@ -96,7 +87,7 @@ def _basic_drift_check(
     cur_lengths = [len(t) for t in current_texts]
 
     ref_mean, ref_std = np.mean(ref_lengths), np.std(ref_lengths)
-    cur_mean, cur_std = np.mean(cur_lengths), np.std(cur_lengths)
+    cur_mean = np.mean(cur_lengths)
 
     # Z-test for mean shift
     z_score = abs(cur_mean - ref_mean) / max(ref_std / np.sqrt(len(cur_lengths)), 1e-6)

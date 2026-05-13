@@ -1,9 +1,8 @@
 """FastAPI dependencies — model loading and inference utilities."""
 
 import json
-from collections import Counter, defaultdict
+from collections import defaultdict
 from pathlib import Path
-from typing import Optional
 
 import numpy as np
 import structlog
@@ -30,7 +29,7 @@ class ModelService:
         self.total_predictions = 0
         self.predictions_per_class: dict[str, int] = defaultdict(int)
         self.confidence_scores: list[float] = []
-        self.reference_distribution: Optional[dict] = None
+        self.reference_distribution: dict | None = None
 
         self._load_reference_distribution()
 
@@ -91,18 +90,14 @@ class ModelService:
         cleaned = clean_text(text)
 
         if self.model_type == "transformer":
-            pred_label, confidence, class_probs = self.transformer.predict_single(
-                cleaned
-            )
+            pred_label, confidence, class_probs = self.transformer.predict_single(cleaned)
         else:
-            X, _ = self.tfidf_pipeline.transform([cleaned])
-            proba = self.model.predict_proba(X)[0]
+            features, _ = self.tfidf_pipeline.transform([cleaned])
+            proba = self.model.predict_proba(features)[0]
             pred_idx = int(np.argmax(proba))
             pred_label = self.label_names[pred_idx]
             confidence = float(proba[pred_idx])
-            class_probs = {
-                name: float(proba[i]) for i, name in enumerate(self.label_names)
-            }
+            class_probs = {name: float(proba[i]) for i, name in enumerate(self.label_names)}
 
         # Update monitoring
         self.total_predictions += 1
@@ -130,18 +125,14 @@ class ModelService:
         else:
 
             def predict_fn(texts: list[str]) -> np.ndarray:
-                X, _ = self.tfidf_pipeline.transform(texts)
-                return self.model.predict_proba(X)
+                feats, _ = self.tfidf_pipeline.transform(texts)
+                return self.model.predict_proba(feats)
 
         return predict_fn
 
     def get_metrics(self) -> dict:
         """Get current monitoring metrics."""
-        avg_confidence = (
-            float(np.mean(self.confidence_scores))
-            if self.confidence_scores
-            else 0.0
-        )
+        avg_confidence = float(np.mean(self.confidence_scores)) if self.confidence_scores else 0.0
 
         drift_detected, drift_details = self._check_drift()
 
@@ -161,7 +152,7 @@ class ModelService:
                 self.reference_distribution = json.load(f)
             logger.info("Reference distribution loaded")
 
-    def _check_drift(self) -> tuple[bool, Optional[dict]]:
+    def _check_drift(self) -> tuple[bool, dict | None]:
         """Basic drift check comparing prediction distribution to reference."""
         if not self.reference_distribution or self.total_predictions < 50:
             return False, None
@@ -173,9 +164,7 @@ class ModelService:
 
         ref_normalized = {k: v / ref_total for k, v in ref_dist.items()}
         pred_total = sum(self.predictions_per_class.values())
-        pred_normalized = {
-            k: v / pred_total for k, v in self.predictions_per_class.items()
-        }
+        pred_normalized = {k: v / pred_total for k, v in self.predictions_per_class.items()}
 
         # Simple drift: check if any class ratio shifted > 10%
         max_shift = 0.0
@@ -196,7 +185,7 @@ class ModelService:
 
 
 # Singleton instance
-_model_service: Optional[ModelService] = None
+_model_service: ModelService | None = None
 
 
 def get_model_service() -> ModelService:

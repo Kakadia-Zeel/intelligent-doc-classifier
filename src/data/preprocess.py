@@ -18,9 +18,7 @@ def load_raw_data(config_path: str = "model_config.yaml") -> pd.DataFrame:
 
     path = DATA_DIR / "raw" / "complaints.csv"
     if not path.exists():
-        raise FileNotFoundError(
-            f"Raw data not found at {path}. Run 'make download-data' first."
-        )
+        raise FileNotFoundError(f"Raw data not found at {path}. Run 'make download-data' first.")
 
     df = pd.read_csv(
         path,
@@ -34,23 +32,19 @@ def load_raw_data(config_path: str = "model_config.yaml") -> pd.DataFrame:
 
     # Apply label mapping to consolidate categories
     if "label_mapping" in data_config:
-        df[data_config["target_column"]] = (
-            df[data_config["target_column"]].replace(data_config["label_mapping"])
+        df[data_config["target_column"]] = df[data_config["target_column"]].replace(
+            data_config["label_mapping"]
         )
 
     # Filter rare classes
     class_counts = df[data_config["target_column"]].value_counts()
-    valid_classes = class_counts[
-        class_counts >= data_config["min_samples_per_class"]
-    ].index
+    valid_classes = class_counts[class_counts >= data_config["min_samples_per_class"]].index
     df = df[df[data_config["target_column"]].isin(valid_classes)]
 
     # Cap total samples for faster iteration
     max_samples = data_config.get("max_samples")
     if max_samples and len(df) > max_samples:
-        df = df.sample(
-            n=max_samples, random_state=data_config["random_state"]
-        )
+        df = df.sample(n=max_samples, random_state=data_config["random_state"])
 
     logger.info(
         "Filtered data",
@@ -72,9 +66,10 @@ def clean_text(text: str) -> str:
     text = text.lower()
 
     # CFPB redacts PII with XXXX and XX/XX/XXXX patterns
-    text = re.sub(r"x{2,}", " [REDACTED] ", text)
+    # Date patterns must be matched BEFORE generic XX redaction
     text = re.sub(r"xx/xx/\d{4}", " [DATE] ", text)
     text = re.sub(r"\d{2}/\d{2}/\d{4}", " [DATE] ", text)
+    text = re.sub(r"x{2,}", " [REDACTED] ", text)
     text = re.sub(r"\$[\d,]+\.?\d*", " [AMOUNT] ", text)
 
     # Remove URLs
@@ -89,9 +84,7 @@ def clean_text(text: str) -> str:
     return text
 
 
-def preprocess_dataframe(
-    df: pd.DataFrame, config_path: str = "model_config.yaml"
-) -> pd.DataFrame:
+def preprocess_dataframe(df: pd.DataFrame, config_path: str = "model_config.yaml") -> pd.DataFrame:
     """Apply text preprocessing to the dataframe."""
     config = load_config(config_path)
     text_col = config["data"]["text_column"]

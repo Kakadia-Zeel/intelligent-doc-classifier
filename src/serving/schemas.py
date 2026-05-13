@@ -24,9 +24,7 @@ class ClassifyResponse(BaseModel):
 
     predicted_class: str = Field(description="Predicted product category")
     confidence: float = Field(description="Prediction confidence score")
-    probabilities: dict[str, float] = Field(
-        description="Probability for each class"
-    )
+    probabilities: dict[str, float] = Field(description="Probability for each class")
     explanation: dict | None = Field(
         default=None,
         description="LIME explanation with top contributing words",
@@ -47,9 +45,7 @@ class BatchClassifyRequest(BaseModel):
 class BatchClassifyResponse(BaseModel):
     """Batch document classification response."""
 
-    predictions: list[ClassifyResponse] = Field(
-        description="List of classification results"
-    )
+    predictions: list[ClassifyResponse] = Field(description="List of classification results")
     count: int = Field(description="Number of documents classified")
 
 

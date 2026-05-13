@@ -1,7 +1,5 @@
 """Tests for text preprocessing."""
 
-import pytest
-
 from src.data.preprocess import clean_text
 
 

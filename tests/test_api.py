@@ -46,9 +46,7 @@ def mock_model_service():
 @pytest.fixture
 def client(mock_model_service):
     """Create a test client with mocked model service."""
-    with patch(
-        "src.serving.app.get_model_service", return_value=mock_model_service
-    ):
+    with patch("src.serving.app.get_model_service", return_value=mock_model_service):
         from src.serving.app import app
 
         with TestClient(app) as client:

@@ -3,7 +3,6 @@
 import json
 from collections import defaultdict
 from pathlib import Path
-from typing import Optional
 
 import numpy as np
 import structlog
@@ -20,13 +19,9 @@ class PerformanceTracker:
         self.low_confidence_count = 0
         self.class_confidences: dict[str, list[float]] = defaultdict(list)
 
-    def record_prediction(
-        self, predicted_class: str, confidence: float
-    ) -> Optional[dict]:
+    def record_prediction(self, predicted_class: str, confidence: float) -> dict | None:
         """Record a prediction and return an alert if needed."""
-        self.predictions.append(
-            {"class": predicted_class, "confidence": confidence}
-        )
+        self.predictions.append({"class": predicted_class, "confidence": confidence})
         self.class_confidences[predicted_class].append(confidence)
 
         alert = None
@@ -65,9 +60,7 @@ class PerformanceTracker:
                 "count": len(confs),
                 "avg_confidence": float(np.mean(confs)),
                 "min_confidence": float(np.min(confs)),
-                "low_confidence_count": sum(
-                    1 for c in confs if c < self.low_confidence_threshold
-                ),
+                "low_confidence_count": sum(1 for c in confs if c < self.low_confidence_threshold),
             }
 
         return {
